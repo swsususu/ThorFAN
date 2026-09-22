@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "thorfan"
+version = "0.1.0"
+description = "Fan control and thermal policy editor for NVIDIA Jetson AGX Thor"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "swsususu" }]
+keywords = ["jetson", "thor", "fan", "pwm", "thermal", "tegra", "l4t", "agx"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console :: Curses",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: System :: Hardware",
+    "Topic :: System :: Monitoring",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/swsususu/ThorFAN"
+Repository = "https://github.com/swsususu/ThorFAN"
+Issues = "https://github.com/swsususu/ThorFAN/issues"
+Changelog = "https://github.com/swsususu/ThorFAN/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+gui = ["PyGObject>=3.42"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+thorfan = "thorfan.cli:main"
+
+# No thorfan-gui entry point yet: thorfan/gui/ is an empty package, and a
+# console script that fails on import is worse than a missing one. It returns
+# when the GTK4 interface exists.
+
+[tool.setuptools.packages.find]
+include = ["thorfan*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

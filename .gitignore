@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.venv/
+venv/
+
+# Editor and agent tooling state, not part of the project
+.kilo/
+.vscode/
+.idea/
+*.swp
+
+# Runtime artefacts
+*.log

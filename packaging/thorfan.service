@@ -1,0 +1,60 @@
+[Unit]
+Description=ThorFAN fan control for NVIDIA Jetson
+Documentation=https://github.com/swsususu/ThorFAN
+After=nvfancontrol.service
+
+# The fan must never be left unmanaged, so we recover from crashes, but a
+# persistently failing daemon should give up rather than spin. When the limit
+# is hit systemd stops the unit, and ExecStopPost has already handed the fan
+# back to nvfancontrol by then.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+# Deliberately NOT Conflicts=nvfancontrol.service.
+#
+# ThorFAN manages fan ownership itself: the daemon stops nvfancontrol on
+# startup and restarts it on every exit path. A systemd Conflicts= would fight
+# that, because the daemon's own restart of nvfancontrol at shutdown would make
+# systemd stop this unit, and stopping this unit would restart nvfancontrol
+# again. Leaving ownership entirely to the daemon keeps a single authority over
+# pwm1.
+#
+# The After= above only orders startup, so the vendor daemon has settled before
+# we decide whether to take over.
+
+[Service]
+Type=simple
+
+# /usr/local/bin is where pip installs a system-wide console script on Debian
+# and Ubuntu; /usr/bin is where a distribution package would put it. Listing
+# both as absolute paths keeps the unit working either way, since systemd does
+# not search PATH. Adjust these if you installed into a virtualenv or pipx.
+ExecStart=/usr/local/bin/thorfan daemon
+
+# Belt and braces: the daemon restores nvfancontrol on SIGTERM and on unhandled
+# exceptions, but not on SIGKILL or a hard crash. This runs regardless of how
+# the process died. 'thorfan restore' is idempotent; starting an already-active
+# service is a no-op.
+ExecStopPost=/usr/local/bin/thorfan restore
+
+Restart=on-failure
+RestartSec=5
+
+# Writing pwm1 and calling systemctl both need root.
+User=root
+
+# Terminate with SIGTERM and allow time for the ownership handover.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Modest hardening. The daemon needs /sys write access for pwm1 and
+# /etc/thorfan for its config, so ProtectSystem=strict is not usable without
+# explicit ReadWritePaths.
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+
+[Install]
+WantedBy=multi-user.target
